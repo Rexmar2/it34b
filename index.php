@@ -1,5 +1,4 @@
 <?php
-
 require_once 'config/config.php';
 require_once 'config/function.php';
 
@@ -14,13 +13,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $login = trim($_POST['login'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (loginUser($pdo, $login, $password)) {
-        echo 'Location ' . BASE_URL . '/app/' . $_SESSION['user_role'] . '/index.php';
-        header('Location: ' . BASE_URL . '/app/' . $_SESSION['user_role'] . '/index.php');
-        exit;
-    }
-    
     $error = 'Invalid login credentials';
+
+    if ($login === '' || $password === '') {
+        // Log incomplete login attempt
+        logActivity($pdo, null, $login, 'login', 'failed');
+    } else {
+        if (loginUser($pdo, $login, $password)) {
+            // Log incomplete login attempt
+            logActivity($pdo, $_SESSION['user_id'], $_SESSION['user_email'], 'login', 'success');
+
+            echo 'Location: ' . BASE_URL . '/app/' . $_SESSION['user_role'] . '/index.php';
+            header('Location: ' . BASE_URL . '/app/' . $_SESSION['user_role'] . '/index.php');
+            exit;
+        }
+    }
 }
 ?>
 
@@ -32,21 +39,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Login</title>
 </head>
 <body>
-    <form method="POST">
-         <label>Username or Email</label>
-         <input type="text"
-                name="login"
-                required>
 
+<form method="POST">
+    <label>Username or Email</label>
+    <input type="text"
+            name="login"
+            required>
         <br>
         <br>
         <label>Password</label>
         <input type="password"
-        name="password"
-        required>
+            name="password"
+            required>
         <br>
         <button type="submit">Sign In</button>
 </form>
-
+    
 </body>
 </html>
