@@ -1,10 +1,4 @@
 <?php
-
-function redirect($path){
-    header("Location: " . BASE_URL . $path);
-    exit;
-}
-
 function loginUser($pdo, $login, $password){
     #Query 2
     $sql = "
@@ -58,5 +52,4 @@ function requireRole($role)
         die('Access denied.');
     }
 }
-
 ?>

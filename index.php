@@ -1,6 +1,6 @@
 <?php
 require_once 'config/config.php';
-require_once 'config/function.php';
+
 
 if (isset($_SESSION['user_id'])) {
     header('Location: ' . BASE_URL . '/app/' . $_SESSION['user_role'] . '/index.php');
@@ -37,8 +37,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    
 </head>
 <body>
+
+ <div class="d-flex justify-content-center align-items-center min-vh-100">
+<form method="POST">
+
+ <?php if (!empty($error)): ?>
+            <p><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?> 
 
 <form method="POST">
     <label>Username or Email</label>
