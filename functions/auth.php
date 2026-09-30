@@ -55,4 +55,3 @@ function requireRole($role)
 }
 ?> 
 
-i need to dfinish this off
