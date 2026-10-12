@@ -76,6 +76,13 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
 
 </form>
+
+    <?php if(isset($_GET['timeout'])): ?>
+    <p>Your session has expired due to inactivity. Please log in again.</p>
+
+    <?php endif; ?>
+
+
     
 </body>
 </html>     
