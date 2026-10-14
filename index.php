@@ -1,78 +1,105 @@
 <?php
-require_once('config/config.php');
+require_once 'config/config.php';
 
-$user_id = "root";
-$user_email = "root";
 
-$buttons = [
-    'login',
-    'logout',
-    'create Record',
-    'update Record',
-    'delete Record',
-    'view Record',
-    'upload File',
-    'Download',
-    'Search',
-    'Generate Report',
-];
+
+if(isset($_SESSION['user_id'])){
+    header('Location' . BASE_URL . '/app/' . $_SESSION['user_role'] . '/index.php');
+    exit;
+}
+
+$error='';
+
+if($_SERVER['REQUEST_METHOD'] === 'POST'){
+    $login = trim($_POST['login'] ?? '' );
+    $password = $_POST['password'] ?? '';
+
+    
+
+    $error = 'Invalid Login Credentials';
+
+    if ($login=== '' || $password ===''){
+
+        // Log Incomplete
+        logActivity($pdo,null,$login,'login','failed');
+
+    }else{
+
+    $result = loginUser($pdo,$login,$password);
+
+    if($result===true){
+        logActivity(
+            $pdo,$_SESSION['user_id'],
+            $_SESSION['user_email'],
+            'login',
+            'success'
+        );
+        
+        header('Location:' . BASE_URL . '/app/' . $_SESSION['user_role'] . '/index.php');
+        exit;
+
+
+
+    }elseif($result=== 'active_session'){
+        echo 'This Account is already logged in on another device';
+        $error = 'This Account is already logged in on another device';
+        
+
+    }else{
+
+        $error = 'Invalid login credentials';
+    }
+    }
+
+}
+
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
+        
+   
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activity Logger Test</title>
+    <title>Login</title>
 </head>
 <body>
+    
+  <div class="d-flex justify-content-center align-items-center min-vh-100">
+<form method="POST">
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>Action</th>
-        <th>Test</th>
-    </tr>
+   <?php if (!empty($error)): ?>
+            <p><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?> 
 
-    <?php foreach ($buttons as $button): ?>
-    <tr>
-        <td><?= htmlspecialchars($button); ?></td>
-        <td>
-            <form method="post">
-                <input
-                    type="hidden"
-                    name="action"
-                    value="<?= htmlspecialchars($button); ?>"
-                >
-                <button type="submit">Test</button>
-            </form>
-        </td>
-    </tr>
-    <?php endforeach; ?>
+    <label>Username or Email</label>
+    <input type="text" name="login" class="form-control"  required>
 
-</table>
+    <br>
+    <br>
+    <label>Password</label>
+    <input type="password"
+            name="password" class = "form-control" 
+            required>
+    <br>
+    <button type="submit">Sign In</button>
+    
+</form>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.8/js/bootstrap.bundle.min.js"></script>
 
-<?php
-if($_SERVER['REQUEST_METHOD'] === 'POST'){
+<?php if (isset($_GET['timeout'])): ?>
+    
+    <p>Your session has timed out due to inactivity. Please log in again.</p>
 
-$action = $_POST['action'] ?? "test_activity";
+    <?php endif; ?>
 
-$status = random_int(0,1) === 1? 'success' : 'failed';
-
-$success = logActivity(
-    $pdo,
-    $user_id,
-    $user_email,
-    $action,
-    $status
-);
-if($success){
-    echo "<p> Activity: ". htmlspecialchars($action) .
-    "status: ". htmlspecialchars($status) .
-     " logged successfully!</p>";
+        
+    
 
 
-} else {
-    echo "Failed to insert activity log!";
-}
-}
-?>
+
+</body>
+
+</html>
